@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       imageBase64: body.imageBase64,
       imageMediaType: body.imageMediaType ?? "image/jpeg",
       secondsTaken: body.secondsTaken ?? 0,
-      hintsUsed: body.hintsUsed ?? 0,
+      hintUsage: body.hintUsage ?? [],
     };
 
     const verdict = await grade(question, attempt);

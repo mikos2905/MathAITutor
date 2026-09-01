@@ -102,6 +102,44 @@ export function buildQuestionBlock(question: Question): string {
 }
 
 /**
+ * Describes how much help the student took, and on which parts.
+ *
+ * This matters for honest feedback: marks earned only after being told the
+ * method are not marks the student would score in May, and saying so is the
+ * whole point of the ladder being gated in the first place.
+ */
+function describeHints(question: Question, attempt: Attempt): string {
+  if (attempt.hintUsage.length === 0) {
+    return "The student used no hints. Do not raise a hint-reliance flag.";
+  }
+
+  const lines = attempt.hintUsage.map((usage) => {
+    const part = question.parts.find((p) => p.label === usage.partLabel);
+    const given = (part?.hints ?? [])
+      .filter((h) => h.rung <= usage.highestRung)
+      .flatMap((h) => h.unblocks ?? []);
+    const unique = [...new Set(given)];
+
+    return (
+      `- Part (${usage.partLabel}): climbed to rung ${usage.highestRung} of 5.` +
+      (usage.highestRung >= 4
+        ? ` Rung 4 performs a step for the student and rung 5 gives the full solution, so any of these marks they now score were not earned unaided: ${unique.join(", ") || "none recorded"}.`
+        : ` Rungs 1-3 only orient and suggest a strategy; they do not execute any mathematics, so marks earned after them still count as the student's own work.`)
+    );
+  });
+
+  const tookHeavyHelp = attempt.hintUsage.some((u) => u.highestRung >= 4);
+
+  return [
+    "The student used the hint ladder before submitting:",
+    ...lines,
+    tookHeavyHelp
+      ? 'Raise a "hint-reliance" technique flag naming the parts where a rung 4 or 5 hint was taken, and state plainly which marks would not have been earned in an exam. Still award the marks for what is written — the flag is the honest caveat, not a penalty.'
+      : "Do not raise a hint-reliance flag: the help taken was orientation only.",
+  ].join("\n");
+}
+
+/**
  * The volatile part of the request: timing context for this specific attempt.
  * Kept after the cacheable blocks and before the image.
  */
@@ -117,10 +155,7 @@ export function buildAttemptBlock(question: Question, attempt: Attempt): string 
         ? `The student took only ${actual.toFixed(1)} minutes against about ${expected.toFixed(1)} available. If marks were lost, consider whether they rushed.`
         : `The student took ${actual.toFixed(1)} minutes against about ${expected.toFixed(1)} available. Timing is fine — do not raise a timing flag.`;
 
-  const hints =
-    attempt.hintsUsed > 0
-      ? `The student used ${attempt.hintsUsed} hint(s) before submitting. Mark the working as written; mention the hint reliance only if it is relevant to what to fix next.`
-      : `The student used no hints.`;
+  const hints = describeHints(question, attempt);
 
   return `# This attempt\n\n${timing}\n\n${hints}\n\nMark the handwritten working in the image below against the markscheme above.`;
 }

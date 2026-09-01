@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Question, Verdict } from "@/lib/ib/types";
+import type { HintRung, HintUsage, Question, Verdict } from "@/lib/ib/types";
 import { PAPER_RULES } from "@/lib/ib/syllabus";
 import { lookupCommandTerm } from "@/lib/ib/commandTerms";
 import { prepareImage, type PreparedImage } from "@/lib/image";
 import { MathText } from "./MathText";
 import { MarkBreakdown } from "./MarkBreakdown";
+import { HintLadder } from "./HintLadder";
 
 type Stage = "ready" | "attempting" | "submitting" | "marked";
 
@@ -16,6 +17,9 @@ export function AttemptFlow({ question }: { question: Question }) {
   const [image, setImage] = useState<PreparedImage | null>(null);
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Highest rung reached per part. Recorded rather than merely counted, so the
+  // grader can say which specific marks were earned with help.
+  const [hintUsage, setHintUsage] = useState<Record<string, HintRung>>({});
   const fileInput = useRef<HTMLInputElement>(null);
 
   const rules = PAPER_RULES[question.paper];
@@ -39,6 +43,19 @@ export function AttemptFlow({ question }: { question: Question }) {
     }
   }, []);
 
+  const recordHint = useCallback((partLabel: string, rung: HintRung) => {
+    setHintUsage((prev) =>
+      rung > (prev[partLabel] ?? 0) ? { ...prev, [partLabel]: rung } : prev,
+    );
+  }, []);
+
+  function usageForSubmit(): HintUsage[] {
+    return Object.entries(hintUsage).map(([partLabel, highestRung]) => ({
+      partLabel,
+      highestRung,
+    }));
+  }
+
   async function submit() {
     if (!image) return;
     setStage("submitting");
@@ -52,7 +69,7 @@ export function AttemptFlow({ question }: { question: Question }) {
           imageBase64: image.base64,
           imageMediaType: image.mediaType,
           secondsTaken: seconds,
-          hintsUsed: 0,
+          hintUsage: usageForSubmit(),
         }),
       });
       const data = await res.json();
@@ -101,6 +118,9 @@ export function AttemptFlow({ question }: { question: Question }) {
                     <MathText text={part.prompt} />
                     <span className="ml-2 text-sm text-neutral-500">[{part.marks}]</span>
                   </p>
+                  {stage === "attempting" && (
+                    <HintLadder part={part} onRungRevealed={recordHint} />
+                  )}
                   {ct && (
                     <details className="text-sm">
                       <summary className="cursor-pointer text-neutral-500">
@@ -209,6 +229,7 @@ export function AttemptFlow({ question }: { question: Question }) {
               setSeconds(0);
               setImage(null);
               setVerdict(null);
+              setHintUsage({});
             }}
             className="rounded border border-neutral-400 px-5 py-2.5 font-medium hover:bg-neutral-100 dark:border-neutral-600 dark:hover:bg-neutral-800"
           >

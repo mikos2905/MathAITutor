@@ -26,9 +26,31 @@ is needed, and nothing is spent. Set `GRADER=live` and an `ANTHROPIC_API_KEY` in
 | `src/lib/ib/commandTerms.ts` | What each IB command term actually demands, and the marks students lose to each. |
 | `src/lib/ib/syllabus.ts` | Paper structures, calculator rules, the 3 s.f. convention, minutes per mark. |
 | `src/lib/ib/markingPrompt.ts` | The examiner prompt. This is the product; the rest is plumbing. |
+| `src/lib/ib/hints.ts` | The five rungs of the hint ladder and what each one costs you. |
 | `src/lib/grader/` | Grading, with `mock` and `live` behind one interface. |
 | `src/lib/image.ts` | Client-side downscaling before upload. Roughly halves the image cost of every grade. |
 | `src/data/questions.ts` | Seed questions with markscheme-shaped rubrics. |
+
+## The hint ladder
+
+Being handed a full worked solution the moment you are stuck is the fastest way
+to feel like you understood something you cannot then reproduce. So hints come
+in five rungs, gentlest first, and you can only reach one by reading the one
+below it:
+
+1. **Orient** — what the question is actually asking. Gives nothing away.
+2. **Nudge** — names the technique and asks you a question.
+3. **Strategy** — describes the route without executing it.
+4. **Next step** — does one step, then stops.
+5. **Full solution** — the complete worked answer.
+
+Rungs 4 and 5 sit behind a confirmation, and taking either is recorded and sent
+to the grader, which then says plainly which marks you would not have earned
+unaided. Rungs 1–3 are not penalised — they do no mathematics for you.
+
+The gating is a state machine in the UI rather than an instruction in a prompt.
+A model asked nicely not to give the answer will give the answer the moment you
+push back.
 
 ## Cost
 

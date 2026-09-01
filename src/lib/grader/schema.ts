@@ -40,6 +40,7 @@ export const TechniqueFlagSchema = z.object({
     "unshown-working",
     "notation",
     "timing",
+    "hint-reliance",
   ]),
   message: z
     .string()

@@ -11,6 +11,7 @@ const FLAG_LABELS: Record<TechniqueFlagKind, string> = {
   "unshown-working": "Working not shown",
   notation: "Notation",
   timing: "Timing",
+  "hint-reliance": "Hint reliance",
 };
 
 const MARK_TYPE_HELP: Record<string, string> = {

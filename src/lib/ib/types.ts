@@ -48,6 +48,33 @@ export interface MarkPoint {
   dependentOn?: string;
 }
 
+/**
+ * A rung on the hint ladder.
+ *
+ * The ladder exists to stop the single worst failure mode of AI study tools:
+ * being handed a complete worked solution the moment you are stuck, nodding
+ * along, and learning nothing. Each rung gives the smallest push that might
+ * unblock you, and the gating is enforced in the UI rather than requested in
+ * a prompt — a model will cave if you plead with it, a state machine will not.
+ */
+export type HintRung = 1 | 2 | 3 | 4 | 5;
+
+export interface Hint {
+  rung: HintRung;
+  text: string;
+  /**
+   * Mark point ids this rung helps earn. Used to tell you afterwards which
+   * marks you got with help rather than unaided.
+   */
+  unblocks?: string[];
+}
+
+/** How far up the ladder a student climbed on one part. */
+export interface HintUsage {
+  partLabel: string;
+  highestRung: HintRung;
+}
+
 /** One part of a question, e.g. "(a)". Parts are marked independently. */
 export interface QuestionPart {
   /** "a", "b", "c i", ... */
@@ -60,6 +87,8 @@ export interface QuestionPart {
   rubric: MarkPoint[];
   /** The official final answer, for the student to check against. */
   answer: string;
+  /** Progressive hints, rung 1 (gentlest) to 5 (full solution). */
+  hints: Hint[];
   /**
    * If this part says "hence", it must build on an earlier part.
    * Solving it independently earns nothing — a classic HL mark-loser.
@@ -118,7 +147,8 @@ export type TechniqueFlagKind =
   | "missing-justification" // got the answer, never said why
   | "unshown-working" // answer appeared from nowhere; no M marks possible
   | "notation" // sloppy or wrong notation
-  | "timing"; // spent disproportionate time for the marks available
+  | "timing" // spent disproportionate time for the marks available
+  | "hint-reliance"; // marks earned only after being told the method
 
 export interface TechniqueFlag {
   kind: TechniqueFlagKind;
@@ -159,6 +189,10 @@ export interface Attempt {
   imageMediaType: "image/jpeg" | "image/png" | "image/webp";
   /** Seconds spent on the attempt, from the timer. */
   secondsTaken: number;
-  /** How many hint rungs the student used before submitting. */
-  hintsUsed: number;
+  /**
+   * Which parts needed hints and how far up the ladder they went.
+   * Per-part rather than a bare count: being stuck on the setup of (b) is a
+   * different problem from being stuck on the algebra of (a).
+   */
+  hintUsage: HintUsage[];
 }

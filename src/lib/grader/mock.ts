@@ -40,6 +40,7 @@ export async function gradeMock(question: Question, attempt: Attempt): Promise<V
 
   // Use the real timer value so the timing flag exercises the UI properly.
   const overtime = attempt.secondsTaken > question.suggestedMinutes * 60;
+  const heavyHints = attempt.hintUsage.filter((u) => u.highestRung >= 4);
 
   return {
     transcription:
@@ -54,6 +55,15 @@ export async function gradeMock(question: Question, attempt: Attempt): Promise<V
           "(mock) You reached the right value but never stated why it is a maximum. The R mark needs a sentence.",
         marksCost: 1,
       },
+      ...(heavyHints.length
+        ? [
+            {
+              kind: "hint-reliance" as const,
+              message: `(mock) You took a rung 4 or 5 hint on part${heavyHints.length > 1 ? "s" : ""} ${heavyHints.map((u) => `(${u.partLabel})`).join(", ")}. Those marks would not have come in an exam.`,
+              marksCost: 0,
+            },
+          ]
+        : []),
       ...(overtime
         ? [
             {
