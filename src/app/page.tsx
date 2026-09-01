@@ -8,7 +8,12 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">IB Maths AA HL</h1>
+      <div className="flex items-baseline justify-between gap-4">
+        <h1 className="text-2xl font-semibold">IB Maths AA HL</h1>
+        <Link href="/profile" className="text-sm text-neutral-500 hover:underline">
+          Your profile →
+        </Link>
+      </div>
       <p className="mt-2 text-neutral-600 dark:text-neutral-400">
         Work a question on paper, photograph it, and get marked the way an examiner would —
         mark by mark, with the method and reasoning marks separated out.

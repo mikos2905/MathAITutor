@@ -1,4 +1,5 @@
 import type { Question, Attempt, Verdict } from "@/lib/ib/types";
+import type { StudentModel } from "@/lib/student/types";
 import { gradeMock } from "./mock";
 
 /**
@@ -8,12 +9,16 @@ import { gradeMock } from "./mock";
  * API key present. Set GRADER=live (and ANTHROPIC_API_KEY) to mark for real.
  * The live module is imported lazily so a missing key never breaks the build.
  */
-export async function grade(question: Question, attempt: Attempt): Promise<Verdict> {
+export async function grade(
+  question: Question,
+  attempt: Attempt,
+  model: StudentModel,
+): Promise<Verdict> {
   if (process.env.GRADER === "live") {
     const { gradeLive } = await import("./live");
-    return gradeLive(question, attempt);
+    return gradeLive(question, attempt, model);
   }
-  return gradeMock(question, attempt);
+  return gradeMock(question, attempt, model);
 }
 
 export function graderMode(): "live" | "mock" {

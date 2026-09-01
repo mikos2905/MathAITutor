@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getQuestion } from "@/data/questions";
 import { grade, graderMode } from "@/lib/grader";
+import { loadModel, recordAttempt } from "@/lib/student/store";
 import type { Attempt } from "@/lib/ib/types";
 
 /**
@@ -33,7 +34,17 @@ export async function POST(request: Request) {
       hintUsage: body.hintUsage ?? [],
     };
 
-    const verdict = await grade(question, attempt);
+    const model = await loadModel();
+    const verdict = await grade(question, attempt, model);
+
+    // Persist after grading, so this attempt feeds the next one's context.
+    // A failure to record must not lose the student their feedback.
+    try {
+      await recordAttempt(question, attempt, verdict);
+    } catch (recordError) {
+      console.error("[grade] verdict was produced but could not be recorded:", recordError);
+    }
+
     return NextResponse.json({ verdict, mode: graderMode() });
   } catch (error) {
     console.error("[grade] failed:", error);

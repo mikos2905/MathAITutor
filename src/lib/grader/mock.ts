@@ -1,4 +1,5 @@
 import type { Question, Attempt, Verdict } from "@/lib/ib/types";
+import type { StudentModel } from "@/lib/student/types";
 
 /**
  * A deterministic fake grader.
@@ -8,7 +9,11 @@ import type { Question, Attempt, Verdict } from "@/lib/ib/types";
  * a realistically-shaped verdict: some marks earned, some lost, a technique
  * flag and a misconception, so the UI is exercised properly.
  */
-export async function gradeMock(question: Question, attempt: Attempt): Promise<Verdict> {
+export async function gradeMock(
+  question: Question,
+  attempt: Attempt,
+  model: StudentModel,
+): Promise<Verdict> {
   await new Promise((r) => setTimeout(r, 900)); // fake latency so loading states are real
 
   const parts = question.parts.map((part, partIndex) => {
@@ -41,6 +46,9 @@ export async function gradeMock(question: Question, attempt: Attempt): Promise<V
   // Use the real timer value so the timing flag exercises the UI properly.
   const overtime = attempt.secondsTaken > question.suggestedMinutes * 60;
   const heavyHints = attempt.hintUsage.filter((u) => u.highestRung >= 4);
+  // Reuse a stable id so repeat attempts accumulate on one record and the
+  // student model's recurrence detection is actually exercised.
+  const seenBefore = model.misconceptions["mock-misconception"]?.occurrences.length ?? 0;
 
   return {
     transcription:
@@ -77,7 +85,9 @@ export async function gradeMock(question: Question, attempt: Attempt): Promise<V
     misconceptions: [
       {
         id: "mock-misconception",
-        statement: "(mock) Treats a stationary point as automatically a maximum.",
+        statement:
+          "(mock) Treats a stationary point as automatically a maximum." +
+          (seenBefore ? ` Seen ${seenBefore + 1} times now.` : ""),
         topic: question.topic,
         evidence: "(mock) evidence from your working",
       },

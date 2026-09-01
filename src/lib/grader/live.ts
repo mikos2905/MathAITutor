@@ -6,6 +6,8 @@ import {
   buildQuestionBlock,
   buildAttemptBlock,
 } from "@/lib/ib/markingPrompt";
+import type { StudentModel } from "@/lib/student/types";
+import { buildHistoryBlock } from "@/lib/student/promptBlock";
 import { VerdictSchema } from "./schema";
 
 /**
@@ -23,7 +25,11 @@ const EFFORT = (process.env.GRADER_EFFORT ?? "high") as
 
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from the environment
 
-export async function gradeLive(question: Question, attempt: Attempt): Promise<Verdict> {
+export async function gradeLive(
+  question: Question,
+  attempt: Attempt,
+  model: StudentModel,
+): Promise<Verdict> {
   const response = await client.messages.parse({
     model: "claude-opus-5",
     max_tokens: 16000,
@@ -58,6 +64,10 @@ export async function gradeLive(question: Question, attempt: Attempt): Promise<V
               data: attempt.imageBase64,
             },
           },
+          // History varies per request, so it sits after both cache
+          // breakpoints; putting it earlier would invalidate the cache on
+          // every single grade.
+          { type: "text", text: buildHistoryBlock(model) },
           { type: "text", text: buildAttemptBlock(question, attempt) },
         ],
       },
