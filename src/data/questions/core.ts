@@ -13,7 +13,7 @@ import type { Question } from "@/lib/ib/types";
  *
  * `String.raw` is used wherever LaTeX appears so backslashes survive.
  */
-export const QUESTIONS: Question[] = [
+export const CORE_QUESTIONS: Question[] = [
   {
     id: "aahl-calc-001",
     paper: "P1",
@@ -436,7 +436,3 @@ export const QUESTIONS: Question[] = [
     ],
   },
 ];
-
-export function getQuestion(id: string): Question | undefined {
-  return QUESTIONS.find((q) => q.id === id);
-}
