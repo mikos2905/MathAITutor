@@ -1,4 +1,4 @@
-import type { TechniqueFlagKind, Topic } from "@/lib/ib/types";
+import type { RecallGrade, TechniqueFlagKind, Topic } from "@/lib/ib/types";
 import { TOPIC_NAMES } from "@/lib/ib/syllabus";
 import type {
   Diagnosis,
@@ -65,6 +65,9 @@ export function analyse(model: StudentModel): Diagnosis {
     };
   });
 
+  const byGrade: Record<RecallGrade, number> = { solid: 0, partial: 0, absent: 0 };
+  for (const check of model.recallChecks ?? []) byGrade[check.grade] += 1;
+
   return {
     totalAttempts: model.attempts.length,
     marksAwarded: model.attempts.reduce((s, a) => s + a.marksAwarded, 0),
@@ -79,6 +82,7 @@ export function analyse(model: StudentModel): Diagnosis {
     stale: topics
       .filter((t) => t.daysSinceLast === null || t.daysSinceLast >= STALE_DAYS)
       .sort((a, b) => (b.daysSinceLast ?? 9999) - (a.daysSinceLast ?? 9999)),
+    recall: { total: (model.recallChecks ?? []).length, byGrade },
   };
 }
 

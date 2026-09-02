@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { Verdict, Question, Attempt } from "@/lib/ib/types";
+import type { Verdict, Question, Attempt, RecallGrade } from "@/lib/ib/types";
 import { EMPTY_MODEL, type AttemptRecord, type StudentModel } from "./types";
 
 /**
@@ -26,6 +26,7 @@ export async function loadModel(): Promise<StudentModel> {
     return {
       attempts: parsed.attempts ?? [],
       misconceptions: parsed.misconceptions ?? {},
+      recallChecks: parsed.recallChecks ?? [],
     };
   } catch (error) {
     // A missing file is the normal first-run case, not an error.
@@ -93,6 +94,7 @@ export async function recordAttempt(
     techniqueFlags: verdict.techniqueFlags,
     misconceptionIds: verdict.misconceptions.map((m) => m.id),
     marksLostByType: marksLostByType(question, verdict),
+    verdict,
   };
 
   model.attempts.push(record);
@@ -116,5 +118,12 @@ export async function recordAttempt(
     }
   }
 
+  await saveModel(model);
+}
+
+/** Records the outcome of an explain-it-back check. */
+export async function recordRecall(questionId: string, grade: RecallGrade): Promise<void> {
+  const model = await loadModel();
+  model.recallChecks.push({ at: new Date().toISOString(), questionId, grade });
   await saveModel(model);
 }

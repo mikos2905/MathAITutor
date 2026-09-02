@@ -196,3 +196,33 @@ export interface Attempt {
    */
   hintUsage: HintUsage[];
 }
+
+// ---------------------------------------------------------------------------
+// Explain it back
+// ---------------------------------------------------------------------------
+
+/**
+ * How well the student could restate the method in their own words.
+ *
+ * A student who can explain the method has learned it. A student who cannot
+ * has watched someone else do it and felt the feeling of understanding, which
+ * is the trap this whole app is built to avoid.
+ */
+export type RecallGrade = "solid" | "partial" | "absent";
+
+export interface RecallVerdict {
+  grade: RecallGrade;
+  /** Steps of the method the student genuinely articulated. */
+  captured: string[];
+  /** Steps they left out, in the order they would need them. */
+  missing: string[];
+  /** Two or three sentences addressed to the student. */
+  comment: string;
+}
+
+/** A recall check, stored so progress in retention is visible over time. */
+export interface RecallCheck {
+  at: string;
+  questionId: string;
+  grade: RecallGrade;
+}

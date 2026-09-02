@@ -1,4 +1,12 @@
-import type { HintUsage, TechniqueFlag, TechniqueFlagKind, Topic } from "@/lib/ib/types";
+import type {
+  HintUsage,
+  RecallCheck,
+  RecallGrade,
+  Verdict,
+  TechniqueFlag,
+  TechniqueFlagKind,
+  Topic,
+} from "@/lib/ib/types";
 
 /**
  * The student model: what the tutor remembers about you between sessions.
@@ -42,14 +50,26 @@ export interface AttemptRecord {
    * three different fixes — and most students never learn which is theirs.
    */
   marksLostByType: Record<string, number>;
+  /**
+   * The full verdict, so past feedback can be re-read rather than being a
+   * score you half-remember. Optional because histories written by earlier
+   * versions do not carry it.
+   */
+  verdict?: Verdict;
 }
 
 export interface StudentModel {
   attempts: AttemptRecord[];
   misconceptions: Record<string, MisconceptionRecord>;
+  /** Explain-it-back results, the closest thing here to a retention measure. */
+  recallChecks: RecallCheck[];
 }
 
-export const EMPTY_MODEL: StudentModel = { attempts: [], misconceptions: {} };
+export const EMPTY_MODEL: StudentModel = {
+  attempts: [],
+  misconceptions: {},
+  recallChecks: [],
+};
 
 // ---------------------------------------------------------------------------
 // Derived analysis
@@ -82,4 +102,6 @@ export interface Diagnosis {
   topics: TopicStanding[];
   /** Topics not touched in over 14 days, oldest first. */
   stale: TopicStanding[];
+  /** How often the student could restate a method unaided. */
+  recall: { total: number; byGrade: Record<RecallGrade, number> };
 }

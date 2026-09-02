@@ -8,6 +8,7 @@ import { prepareImage, type PreparedImage } from "@/lib/image";
 import { MathText } from "./MathText";
 import { MarkBreakdown } from "./MarkBreakdown";
 import { HintLadder } from "./HintLadder";
+import { ExplainItBack } from "./ExplainItBack";
 
 type Stage = "ready" | "attempting" | "submitting" | "marked";
 
@@ -20,6 +21,9 @@ export function AttemptFlow({ question }: { question: Question }) {
   // Highest rung reached per part. Recorded rather than merely counted, so the
   // grader can say which specific marks were earned with help.
   const [hintUsage, setHintUsage] = useState<Record<string, HintRung>>({});
+  // Hides the marking while the recall check is open, so the explanation is
+  // written from memory rather than copied off the screen.
+  const [recallOpen, setRecallOpen] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const rules = PAPER_RULES[question.paper];
@@ -222,7 +226,11 @@ export function AttemptFlow({ question }: { question: Question }) {
 
       {stage === "marked" && verdict && (
         <>
-          <MarkBreakdown verdict={verdict} />
+          {!recallOpen && <MarkBreakdown verdict={verdict} />}
+
+          <ExplainItBack question={question} onWritingChange={setRecallOpen} />
+
+          {!recallOpen && (
           <button
             onClick={() => {
               setStage("ready");
@@ -230,11 +238,13 @@ export function AttemptFlow({ question }: { question: Question }) {
               setImage(null);
               setVerdict(null);
               setHintUsage({});
+              setRecallOpen(false);
             }}
             className="rounded border border-neutral-400 px-5 py-2.5 font-medium hover:bg-neutral-100 dark:border-neutral-600 dark:hover:bg-neutral-800"
           >
             Attempt again
           </button>
+          )}
         </>
       )}
     </div>

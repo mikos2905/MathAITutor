@@ -41,9 +41,14 @@ export default async function ProfilePage() {
   return (
     <main className="mx-auto max-w-2xl space-y-10 px-6 py-12">
       <div>
-        <Link href="/" className="text-sm text-neutral-500 hover:underline">
-          ← All questions
-        </Link>
+        <div className="flex items-baseline justify-between gap-4">
+          <Link href="/" className="text-sm text-neutral-500 hover:underline">
+            ← All questions
+          </Link>
+          <Link href="/history" className="text-sm text-neutral-500 hover:underline">
+            History →
+          </Link>
+        </div>
         <h1 className="mt-6 text-2xl font-semibold">Your profile</h1>
         <p className="mt-1 text-sm text-neutral-500">
           {d.totalAttempts} attempt{d.totalAttempts === 1 ? "" : "s"} · {d.marksAwarded}/
@@ -147,6 +152,32 @@ export default async function ProfilePage() {
                 </span>
               </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Retention: could you actually restate the method afterwards? */}
+      {d.recall.total > 0 && (
+        <section>
+          <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+            Recall
+          </h2>
+          <p className="mb-3 text-sm text-neutral-500">
+            How often you could restate the method in your own words afterwards.
+          </p>
+          <ul className="space-y-1 text-sm">
+            <li className="flex items-baseline justify-between">
+              <span>Could redo it unaided</span>
+              <span className="text-neutral-500">{d.recall.byGrade.solid}</span>
+            </li>
+            <li className="flex items-baseline justify-between">
+              <span>Would have got stuck</span>
+              <span className="text-neutral-500">{d.recall.byGrade.partial}</span>
+            </li>
+            <li className="flex items-baseline justify-between">
+              <span>Had not landed</span>
+              <span className="text-neutral-500">{d.recall.byGrade.absent}</span>
+            </li>
           </ul>
         </section>
       )}
