@@ -20,7 +20,7 @@ the whole flow works, no API key is needed, and nothing is spent. Set
 
 To use it on your phone (which is where photographing paper actually happens),
 open the **Network** URL that `npm run dev` prints, from a device on the same
-wifi.
+wifi. Long questions can be photographed across several pages.
 
 ## What it does
 
@@ -43,7 +43,12 @@ diagnoses where your marks actually go and recommends what to do next.
 
 **Checks whether it stuck.** After the marking, it asks you to restate the
 method in your own words — with the marking hidden — and tells you whether
-your account would survive an exam.
+your account would survive an exam. Then it shows you the model solution, so
+you can find exactly where your working diverged.
+
+**Keeps its own books.** The model decides whether each mark was earned; the
+rubric decides what each is worth and adds them up. A hallucinated mark point
+or a miscounted total is corrected before it reaches the student model.
 
 ## How it's put together
 
@@ -106,7 +111,7 @@ Three things come out of it:
 ## Tests
 
 ```bash
-npm test          # 122 unit tests
+npm test          # 131 unit tests
 npm run e2e       # full browser run (see below)
 ```
 
@@ -136,6 +141,11 @@ numbers rather than estimates.
 
 The Anthropic API is prepaid, so there is no overdraft. Load a small amount, set
 a spend limit, and that is your entire exposure.
+
+## Real past papers
+
+Drop scans in `papers/` — it is gitignored, and `papers/README.md` explains
+what helps most and why they must never be committed.
 
 ## Adding questions
 

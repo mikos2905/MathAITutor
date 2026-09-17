@@ -39,7 +39,7 @@ If the working is genuinely good, say so once, briefly, and move on.
 
 # Reading the photograph
 
-First transcribe what you can actually read from the image, line by line, including anything crossed out. If handwriting is ambiguous, transcribe your best reading and flag the ambiguity rather than guessing silently — the student needs to know if you misread them. If the image is too unclear to mark, say so in the transcription and award no marks rather than inventing working.
+The working may span several pages, each labelled. Transcribe what you can actually read, page by page and line by line, including anything crossed out; prefix each page's transcription with its page number. If handwriting is ambiguous, transcribe your best reading and flag the ambiguity rather than guessing silently — the student needs to know if you misread them. If the image is too unclear to mark, say so in the transcription and award no marks rather than inventing working.
 
 # Misconceptions
 
@@ -157,5 +157,5 @@ export function buildAttemptBlock(question: Question, attempt: Attempt): string 
 
   const hints = describeHints(question, attempt);
 
-  return `# This attempt\n\n${timing}\n\n${hints}\n\nMark the handwritten working in the image below against the markscheme above.`;
+  return `# This attempt\n\n${timing}\n\n${hints}\n\nMark the handwritten working in the page image(s) above against the markscheme.`;
 }

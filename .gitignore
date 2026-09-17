@@ -45,3 +45,7 @@ next-env.d.ts
 
 # personal practice history
 /data/student.json
+
+# real past papers: private study material, IBO copyright, never committed
+/papers/*
+!/papers/README.md

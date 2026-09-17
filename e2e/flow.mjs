@@ -46,6 +46,9 @@ check("every question is listed", (await page.locator("a[href^='/practice/']").c
 await page.goto(`${BASE}/practice/aahl-calc-003`, { waitUntil: "networkidle" });
 check("a Paper 2 question says the GDC is allowed", await page.getByText("GDC allowed").first().isVisible());
 await page.getByRole("button", { name: "Start attempt" }).click();
+await page.waitForTimeout(2600);
+const clock = await page.locator("span.tabular-nums").first().innerText();
+check(`the timer advances from a wall-clock start (reads ${clock.trim()})`, /^00:0[2-4]$/.test(clock.trim()));
 
 const ladder = page.locator("div").filter({ hasText: /^Stuck on \(a\)\?/ }).first();
 await ladder.getByRole("button", { name: /Orient/ }).click();
@@ -58,17 +61,38 @@ check(
   await ladder.getByRole("button", { name: /Strategy/ }).isVisible(),
 );
 
-await page.locator("input[type=file]").setInputFiles(path.join(here, "fixtures", "working.png"));
+// Two pages: a long question rarely fits on one, and the grader must see both.
+const fixture = path.join(here, "fixtures", "working.png");
+await page.locator("input[type=file]").setInputFiles(fixture);
+await page.waitForTimeout(600);
+check("one page uploaded", await page.getByText(/1 page ·/).isVisible());
+await page.locator("input[type=file]").setInputFiles(fixture);
+await page.waitForTimeout(600);
+check("a second page can be added", await page.getByText(/2 pages ·/).isVisible());
+check("pages can be removed", (await page.getByRole("button", { name: /Remove page/ }).count()) === 2);
+await page.getByRole("button", { name: "Remove page 2" }).click();
+await page.waitForTimeout(200);
+check("removing a page updates the count", await page.getByText(/1 page ·/).isVisible());
+await page.locator("input[type=file]").setInputFiles(fixture);
 await page.waitForTimeout(600);
 const tokenText = await page.getByText(/image tokens/).innerText();
 const tokens = Number(tokenText.match(/~([\d,]+)/)[1].replace(/,/g, ""));
 // The model caps a full-resolution photo at 4784 visual tokens; downscaling
-// before upload should keep us comfortably under that on every grade.
-check(`photo downscaled below the token cap (${tokens} < 4784)`, tokens < 4784);
+// before upload should keep each page comfortably under that. Two pages here.
+check(`two downscaled pages stay under one photo's cap (${tokens} < 4784)`, tokens < 4784);
 
 await page.getByRole("button", { name: "Submit for marking" }).click();
 await page.getByText("Fix this next").first().waitFor({ timeout: 30000 });
 check("mark breakdown renders", await page.getByText("Mark by mark").first().isVisible());
+check("model solution is offered after marking", await page.getByText("Model solution").first().isVisible());
+// Fix 1: a student who got it wrong must be able to see what right looks like.
+await page.locator("details").filter({ hasText: "Part (b)" }).last().locator("summary").click();
+await page.waitForTimeout(150);
+check(
+  "the worked solution for a part can be opened",
+  await page.getByText(/total distance of/).first().isVisible(),
+);
+
 
 // --- explain it back ------------------------------------------------------
 await page.getByRole("button", { name: "Start recall check" }).click();
@@ -76,6 +100,10 @@ await page.waitForTimeout(200);
 check(
   "the marking is hidden while the explanation is written",
   !(await page.getByText("Mark by mark").first().isVisible().catch(() => false)),
+);
+check(
+  "the model solution is hidden while the explanation is written",
+  !(await page.getByText("Model solution").first().isVisible().catch(() => false)),
 );
 await page.locator("textarea").fill(
   "Set velocity to zero to find when it turns round, then integrate velocity over each interval separately and add the absolute values, because total distance is not displacement when the particle reverses.",

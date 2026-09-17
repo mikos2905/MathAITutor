@@ -55,15 +55,22 @@ export async function gradeLive(
             text: buildQuestionBlock(question),
             cache_control: { type: "ephemeral" },
           },
-          // Volatile from here down.
-          {
-            type: "image",
-            source: {
-              type: "base64",
-              media_type: attempt.imageMediaType,
-              data: attempt.imageBase64,
+          // Volatile from here down. Each page is introduced by a label so
+          // the transcription can refer to pages by number.
+          ...attempt.images.flatMap((image, i) => [
+            {
+              type: "text" as const,
+              text: `Page ${i + 1} of ${attempt.images.length}:`,
             },
-          },
+            {
+              type: "image" as const,
+              source: {
+                type: "base64" as const,
+                media_type: image.mediaType,
+                data: image.base64,
+              },
+            },
+          ]),
           // History varies per request, so it sits after both cache
           // breakpoints; putting it earlier would invalidate the cache on
           // every single grade.

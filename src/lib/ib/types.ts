@@ -181,12 +181,22 @@ export interface Verdict {
   oneThingToFix: string;
 }
 
+/** One photographed page of working. */
+export interface AttemptImage {
+  /** Base64 image data, no data: prefix. */
+  base64: string;
+  mediaType: "image/jpeg" | "image/png" | "image/webp";
+}
+
 /** What the student submits for marking. */
 export interface Attempt {
   questionId: string;
-  /** Base64 image data (no data: prefix) of the handwritten working. */
-  imageBase64: string;
-  imageMediaType: "image/jpeg" | "image/png" | "image/webp";
+  /**
+   * Pages of handwritten working, in order. A 20-mark Paper 3 investigation
+   * does not fit on one page, and a grader that only sees page one marks the
+   * rest as missing.
+   */
+  images: AttemptImage[];
   /** Seconds spent on the attempt, from the timer. */
   secondsTaken: number;
   /**
