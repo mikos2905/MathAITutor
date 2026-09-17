@@ -121,3 +121,16 @@ describe("question bank", () => {
     });
   });
 });
+
+describe("concept tags", () => {
+  it("tags every question with at least one known concept", async () => {
+    const { ALL_CONCEPTS, topicOfConcept } = await import("@/lib/ib/syllabus");
+    for (const q of QUESTIONS) {
+      expect(q.concepts.length, `${q.id} has no concepts`).toBeGreaterThan(0);
+      for (const c of q.concepts) {
+        expect(ALL_CONCEPTS, `${q.id} uses unknown concept "${c}"`).toContain(c);
+        expect(topicOfConcept(c), `${q.id}: concept "${c}" belongs to another topic`).toBe(q.topic);
+      }
+    }
+  });
+});

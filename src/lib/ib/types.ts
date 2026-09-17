@@ -102,6 +102,8 @@ export interface Question {
   topic: Topic;
   /** Short human label, e.g. "Integration by substitution". */
   title: string;
+  /** Concepts from CONCEPTS this question exercises, so learn mode can find it. */
+  concepts: string[];
   /** Optional shared stem shown above all parts. */
   stem?: string;
   parts: QuestionPart[];
@@ -235,4 +237,31 @@ export interface RecallCheck {
   at: string;
   questionId: string;
   grade: RecallGrade;
+}
+
+// ---------------------------------------------------------------------------
+// Learn mode
+// ---------------------------------------------------------------------------
+
+/** An explanation of a concept, shaped by the student's own history. */
+export interface Lesson {
+  /** The concept the request was interpreted as, from CONCEPTS where possible. */
+  concept: string;
+  topic: Topic;
+  title: string;
+  /** Short paragraphs, inline LaTeX between $...$. Rendered in order. */
+  paragraphs: string[];
+  /** The one mistake to watch for — this student's own, where history shows one. */
+  trap: string;
+  /** Whether the key result is in the formula booklet, and what that means for revision. */
+  booklet: string;
+  /** One question to answer in your head before practising. No answer given. */
+  checkYourself: string;
+}
+
+/** A lesson read, stored so "read but never practised" can be noticed. */
+export interface LessonRecord {
+  at: string;
+  concept: string;
+  topic: Topic;
 }

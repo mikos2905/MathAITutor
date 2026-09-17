@@ -6,6 +6,7 @@ export const TRIGONOMETRY_QUESTIONS: Question[] = [
     paper: "P1",
     topic: "3-geometry-trigonometry",
     title: "Trigonometric equation disguised as a quadratic",
+    concepts: ["trigonometric equations"],
     source: "original",
     totalMarks: 6,
     suggestedMinutes: 7,

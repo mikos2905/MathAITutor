@@ -5,7 +5,7 @@ import type { AttemptRecord, StudentModel } from "@/lib/student/types";
 /** Builds a model with sensible empty defaults, so a new field does not
  *  require touching every case. */
 function model(over: Partial<StudentModel> = {}): StudentModel {
-  return { attempts: [], misconceptions: {}, recallChecks: [], ...over };
+  return { attempts: [], misconceptions: {}, recallChecks: [], lessons: [], ...over };
 }
 
 const DAY = 1000 * 60 * 60 * 24;

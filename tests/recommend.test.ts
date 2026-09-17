@@ -7,7 +7,7 @@ const DAY = 1000 * 60 * 60 * 24;
 const daysAgo = (n: number) => new Date(Date.now() - n * DAY).toISOString();
 
 function model(over: Partial<StudentModel> = {}): StudentModel {
-  return { attempts: [], misconceptions: {}, recallChecks: [], ...over };
+  return { attempts: [], misconceptions: {}, recallChecks: [], lessons: [], ...over };
 }
 
 function attempt(over: Partial<AttemptRecord> = {}): AttemptRecord {
@@ -141,5 +141,48 @@ describe("recommend", () => {
       expect(rec.reason.length).toBeGreaterThan(10);
       expect(rec.reason.trim().endsWith(".")).toBe(true);
     }
+  });
+});
+
+describe("lessons feed recommendations", () => {
+  it("recommends a question on a concept that was explained but never practised", () => {
+    const recs = recommend(
+      model({ lessons: [{ at: daysAgo(1), concept: "kinematics", topic: "5-calculus" }] }),
+      QUESTIONS,
+    );
+    const rec = recs.find((r) => r.kind === "unpractised");
+    expect(rec).toBeDefined();
+    expect(rec!.question.concepts).toContain("kinematics");
+    expect(rec!.reason).toMatch(/kinematics explained/);
+  });
+
+  it("stops recommending once a question on that concept has been attempted since", () => {
+    const kin = QUESTIONS.find((q) => q.concepts.includes("kinematics"))!;
+    const recs = recommend(
+      model({
+        lessons: [{ at: daysAgo(3), concept: "kinematics", topic: "5-calculus" }],
+        attempts: [attempt({ questionId: kin.id, topic: kin.topic, at: daysAgo(1) })],
+      }),
+      QUESTIONS,
+    );
+    expect(recs.every((r) => r.kind !== "unpractised")).toBe(true);
+  });
+
+  it("ignores a lesson on a concept the bank has no question for", () => {
+    const recs = recommend(
+      model({ lessons: [{ at: daysAgo(1), concept: "maclaurin series", topic: "5-calculus" }] }),
+      QUESTIONS,
+    );
+    expect(recs.every((r) => r.kind !== "unpractised")).toBe(true);
+  });
+});
+
+describe("mock concept matcher", () => {
+  it("maps free text onto a concept by word overlap, ignoring plurals", async () => {
+    const { matchConcept } = await import("@/lib/learn/mock");
+    expect(matchConcept("how do i know when a stationary point is a max")).toBe("stationary points");
+    expect(matchConcept("the chain rule")).toBe("chain rule");
+    expect(matchConcept("integrating by substitution")).toBe("integration by substitution");
+    expect(matchConcept("xyzzy")).toBeUndefined();
   });
 });

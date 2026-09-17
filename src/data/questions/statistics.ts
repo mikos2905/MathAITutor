@@ -6,6 +6,7 @@ export const STATISTICS_QUESTIONS: Question[] = [
     paper: "P1",
     topic: "4-statistics-probability",
     title: "Conditional probability and testing independence",
+    concepts: ["probability rules", "conditional probability"],
     source: "original",
     totalMarks: 6,
     suggestedMinutes: 7,

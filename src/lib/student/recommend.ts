@@ -17,7 +17,8 @@ export type RecommendationKind =
   | "misconception" // a specific error that keeps recurring
   | "stale" // a topic going cold
   | "unseen" // never attempted at all
-  | "hint-reliant"; // "passed" only because it was handed over
+  | "hint-reliant" // "passed" only because it was handed over
+  | "unpractised"; // had it explained, never did a question on it
 
 export interface Recommendation {
   question: Question;
@@ -65,7 +66,27 @@ export function recommend(
     );
   }
 
-  // 2. Topics carrying a misconception that keeps coming back.
+  // 2. Concepts explained but never practised. Reading is not learning, and
+  //    the gap between them is the one this app exists to close.
+  for (const lesson of [...(model.lessons ?? [])].reverse()) {
+    if (out.length >= limit) break;
+    const concept = lesson.concept.toLowerCase();
+    const onConcept = questions.filter((q) =>
+      q.concepts.some((c) => c.toLowerCase() === concept),
+    );
+    if (onConcept.length === 0) continue;
+    const practisedSince = model.attempts.some(
+      (a) => a.at > lesson.at && onConcept.some((q) => q.id === a.questionId),
+    );
+    if (practisedSince) continue;
+    push(
+      onConcept.find((q) => attemptsFor(q.id).length === 0) ?? onConcept[0],
+      "unpractised",
+      `You had ${lesson.concept} explained ${daysSince(lesson.at) === 0 ? "today" : `${daysSince(lesson.at)} day(s) ago`} and have not done a question on it since.`,
+    );
+  }
+
+  // 3. Topics carrying a misconception that keeps coming back.
   for (const recurring of d.recurring) {
     if (out.length >= limit) break;
     const topic = recurring.record.topic;

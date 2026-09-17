@@ -14,6 +14,7 @@ const KIND_LABELS: Record<RecommendationKind, string> = {
   stale: "Going cold",
   unseen: "Not tried",
   "hint-reliant": "Not earned yet",
+  unpractised: "Read, not practised",
 };
 
 export default async function Home() {
@@ -27,6 +28,9 @@ export default async function Home() {
       <div className="flex items-baseline justify-between gap-4">
         <h1 className="text-2xl font-semibold">IB Maths AA HL</h1>
         <nav className="flex gap-4 text-sm text-neutral-500">
+          <Link href="/learn" className="hover:underline">
+            Learn
+          </Link>
           <Link href="/history" className="hover:underline">
             History
           </Link>

@@ -15,6 +15,7 @@ export const PAPER3_QUESTIONS: Question[] = [
     paper: "P3",
     topic: "1-number-algebra",
     title: "Investigation: telescoping sums of reciprocals",
+    concepts: ["partial fractions", "sequences and series"],
     source: "original",
     totalMarks: 20,
     suggestedMinutes: 22,

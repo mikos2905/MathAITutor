@@ -133,6 +133,27 @@ await page.goto(`${BASE}/profile`, { waitUntil: "networkidle" });
 check("profile shows the diagnosis", await page.getByText("Where your marks actually go").first().isVisible());
 check("profile shows the recall tally", await page.getByText("Recall", { exact: true }).first().isVisible());
 
+// --- learn mode: explain, then hand over a question -----------------------
+await page.goto(`${BASE}/learn`, { waitUntil: "networkidle" });
+check("learn page offers concept chips", (await page.getByRole("button", { name: "chain rule" }).count()) === 1);
+await page.getByRole("button", { name: "integration by substitution" }).click();
+await page.getByText("Now practise it").first().waitFor({ timeout: 30000 });
+check("an explanation is shown", (await page.locator("article p").count()) >= 3);
+check("the trap is named", await page.getByText("The trap").first().isVisible());
+check("formula booklet status is given", await page.getByText("Formula booklet").first().isVisible());
+check("a check-yourself question is posed with no answer", await page.getByText(/no answer button on purpose/).isVisible());
+const handoff = page.locator("section").filter({ hasText: "Now practise it" }).locator("a[href^='/practice/']");
+check("the lesson hands over a question on that concept",
+  (await handoff.count()) >= 1 && (await handoff.first().innerText()).includes("Definite integral by substitution"));
+
+// Free text must map onto a concept too, not just chips.
+await page.getByRole("button", { name: "Explain something else" }).click();
+await page.getByLabel("What do you want explained?").fill("how do i know when a stationary point is a max");
+await page.getByRole("button", { name: "Explain" }).click();
+await page.getByText("Now practise it").first().waitFor({ timeout: 30000 });
+check("a free-text request is mapped onto a concept",
+  (await page.locator("article header").innerText()).toLowerCase().includes("stationary points"));
+
 // --- the history feeds back into the recommendations ----------------------
 await page.goto(BASE, { waitUntil: "networkidle" });
 const recs = await page.locator("section").filter({ hasText: "Start here" }).locator("a").allInnerTexts();
@@ -141,6 +162,12 @@ check(
   !recs[0].includes("Kinematics: displacement versus distance"),
 );
 check("the question is marked as attempted", await page.getByText("attempted").first().isVisible());
+// Assert on the reason, not the card: a question title can contain the
+// concept's name and make this pass for the wrong reason.
+check(
+  "a concept explained but not practised becomes a recommendation",
+  recs.some((t) => t.includes("Read, not practised") && /had stationary points explained/.test(t)),
+);
 
 await browser.close();
 console.log(fails.length ? `\n${fails.length} FAILED: ${fails.join(", ")}` : "\nall checks passed");

@@ -6,6 +6,7 @@ export const ALGEBRA_QUESTIONS: Question[] = [
     paper: "P1",
     topic: "1-number-algebra",
     title: "Modulus-argument form and de Moivre",
+    concepts: ["complex numbers"],
     source: "original",
     totalMarks: 7,
     suggestedMinutes: 8,

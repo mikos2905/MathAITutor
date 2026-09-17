@@ -1,5 +1,6 @@
 import type {
   HintUsage,
+  LessonRecord,
   RecallCheck,
   RecallGrade,
   Verdict,
@@ -63,12 +64,15 @@ export interface StudentModel {
   misconceptions: Record<string, MisconceptionRecord>;
   /** Explain-it-back results, the closest thing here to a retention measure. */
   recallChecks: RecallCheck[];
+  /** Concepts the student has had explained. */
+  lessons: LessonRecord[];
 }
 
 export const EMPTY_MODEL: StudentModel = {
   attempts: [],
   misconceptions: {},
   recallChecks: [],
+  lessons: [],
 };
 
 // ---------------------------------------------------------------------------

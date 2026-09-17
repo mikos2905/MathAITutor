@@ -70,3 +70,67 @@ export function minutesPerMark(paper: Paper): number {
  */
 export const ACCURACY_RULE =
   "Unless otherwise stated, give final answers exactly or to three significant figures. Do not round intermediate values — carry full precision through and round only at the end.";
+
+/**
+ * Concepts within each topic, as a student would name them.
+ *
+ * "Calculus" is too coarse to explain or to practise; "chain rule" is the
+ * right grain. Questions are tagged with these so an explanation can hand the
+ * student a matching question, and the learn page offers them as chips.
+ */
+export const CONCEPTS: Record<Topic, string[]> = {
+  "1-number-algebra": [
+    "sequences and series",
+    "binomial theorem",
+    "proof by induction",
+    "complex numbers",
+    "partial fractions",
+    "logarithms and exponents",
+    "systems of linear equations",
+  ],
+  "2-functions": [
+    "functions and inverses",
+    "transformations of graphs",
+    "rational functions",
+    "polynomials and the factor theorem",
+    "modulus and inequalities",
+  ],
+  "3-geometry-trigonometry": [
+    "radians and circular functions",
+    "trigonometric equations",
+    "trigonometric identities",
+    "vectors",
+    "lines and planes",
+  ],
+  "4-statistics-probability": [
+    "probability rules",
+    "conditional probability",
+    "discrete random variables",
+    "binomial distribution",
+    "normal distribution",
+    "regression and correlation",
+  ],
+  "5-calculus": [
+    "differentiation rules",
+    "chain rule",
+    "product and quotient rules",
+    "implicit differentiation",
+    "stationary points",
+    "integration techniques",
+    "integration by substitution",
+    "integration by parts",
+    "kinematics",
+    "differential equations",
+    "maclaurin series",
+  ],
+};
+
+export const ALL_CONCEPTS: string[] = Object.values(CONCEPTS).flat();
+
+export function topicOfConcept(concept: string): Topic | undefined {
+  const needle = concept.trim().toLowerCase();
+  for (const [topic, list] of Object.entries(CONCEPTS) as [Topic, string[]][]) {
+    if (list.includes(needle)) return topic;
+  }
+  return undefined;
+}

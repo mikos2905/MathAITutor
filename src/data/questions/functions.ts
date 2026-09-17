@@ -6,6 +6,7 @@ export const FUNCTIONS_QUESTIONS: Question[] = [
     paper: "P1",
     topic: "2-functions",
     title: "Rational function: asymptotes and inverse",
+    concepts: ["functions and inverses", "rational functions"],
     source: "original",
     totalMarks: 7,
     suggestedMinutes: 8,

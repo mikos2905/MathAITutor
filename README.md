@@ -46,6 +46,13 @@ method in your own words — with the marking hidden — and tells you whether
 your account would survive an exam. Then it shows you the model solution, so
 you can find exactly where your working diverged.
 
+**Explains, then makes you practise.** Pick a concept on `/learn` or ask in
+your own words. The explanation is shaped by your own history — it names *your*
+recurring mistake, not a generic one — says whether the result is in the
+formula booklet, poses one question to answer in your head, and ends by
+handing you a bank question on that concept. A concept you've read about but
+never practised shows up as a recommendation until you do.
+
 **Keeps its own books.** The model decides whether each mark was earned; the
 rubric decides what each is worth and adds them up. A hallucinated mark point
 or a miscounted total is corrected before it reaches the student model.
@@ -61,6 +68,7 @@ or a miscounted total is corrected before it reaches the student model.
 | `src/lib/ib/hints.ts` | The five rungs of the hint ladder and what each costs you. |
 | `src/lib/grader/` | Marking, with `mock` and `live` behind one interface. |
 | `src/lib/recall/` | The explain-it-back check. |
+| `src/lib/learn/` | Learn mode: the explanation prompt and the hand-off to a bank question. |
 | `src/lib/student/` | Memory: store, diagnosis, recommendations, prompt context. |
 | `src/lib/image.ts` | Client-side downscaling before upload. Roughly halves image cost per grade. |
 | `src/data/questions/` | The question bank, one file per topic. |
@@ -111,7 +119,7 @@ Three things come out of it:
 ## Tests
 
 ```bash
-npm test          # 131 unit tests
+npm test          # 136 unit tests
 npm run e2e       # full browser run (see below)
 ```
 
@@ -152,7 +160,8 @@ what helps most and why they must never be committed.
 Add to the relevant file in `src/data/questions/`. The rubric is what matters:
 write it in real markscheme language, type each point M/A/R/AG, and list
 equivalent forms under `accept`. A vague rubric produces vague marking. Then
-write the five hint rungs — rungs 1–3 must not do any mathematics.
+write the five hint rungs — rungs 1–3 must not do any mathematics. Tag it
+with `concepts` from `CONCEPTS` in `syllabus.ts` so learn mode can find it.
 
 `npm test` will tell you if the marks do not add up or a reference is broken.
 
